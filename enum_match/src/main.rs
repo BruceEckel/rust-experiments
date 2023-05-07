@@ -23,7 +23,7 @@ fn main() {
     use Poll2::*; // Bring enum elements into current namespace
     let p1 = Ready(11); // : Poll2<i32>
     let p2 = Ready("hello".to_string()); // : Poll2<String>
-    let p3 = Thing {  // : Poll2<String>
+    let p3 = Thing {     // : Poll2<String>
         n: 42,
         s: "Thing String".to_string(),
     };
@@ -50,4 +50,25 @@ fn main() {
         n: 99,
         s: Baz { n: 42, b: 47 },
     });
+
+    // let checks: [Poll2<_>] = [p1, p2, p3];
+
+    // This doesn't work; how would you create such an array or Vec?
+    // let tests: [Poll2<dyn std::fmt::Debug>] = [
+    //     Poll2::<i32>::Pending,
+    //     Poll2::<String>::Pending,
+    //     Poll2::<Foo>::Pending,
+    //     Poll2::<Bar>::Pending,
+    //     Poll2::<Baz>::Pending,
+    //     p1,
+    //     p2,
+    //     p3,
+    //     Poll2::<Bar>::Ready(Bar(11)),
+    //     Poll2::<Bar>::Thing { n: 99, s: Bar(11) },
+    //     Poll2::<Baz>::Ready(Baz { n: 42, b: 47 }),
+    //     Poll2::<Baz>::Thing {
+    //         n: 99,
+    //         s: Baz { n: 42, b: 47 },
+    //     },
+    // ];
 }
