@@ -29,9 +29,11 @@ where
             // We never call poll() again (???), so is that the best name?
             // If the call to poll() on fa produces Ready, then the task
             // has completed and is ready to deliver results.
-            // (But where the heck does "take()" come from?)
             if let Poll::Ready(()) = fa.poll(wake) {
                 self.a.take();
+                // Option::take() returns the contained value
+                // and then replaces that value with None. Thus the self argument
+                // in poll() must be mutable.
             }
         }
 
@@ -42,7 +44,7 @@ where
             }
         }
 
-        // Similar question: where did is_none() come from?
+        // Option::is_none() returns true if the option is a None value
         if self.a.is_none() && self.b.is_none() {
             // Both futures have completed -- we can return successfully
             Poll::Ready(())
