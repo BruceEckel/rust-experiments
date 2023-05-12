@@ -26,7 +26,9 @@ where
         if let Some(fa) = &mut self.a {
             // Calling poll() starts the fa task.
             // In doing so we've passed the outer wake() to fa's poll().
-            // We never call poll() again (???), so is that the best name?
+            // wake() is how the task communicates back to whatever is
+            // controlling the concurrency (e.g. the event loop).
+            // It says "something has changed so I should be re-activated."
             // If the call to poll() on fa produces Ready, then the task
             // has completed and is ready to deliver results.
             if let Poll::Ready(()) = fa.poll(wake) {
