@@ -1,6 +1,8 @@
 #![allow(unused)]
 use std::rc::Rc;
-// use std::fmt::Display;
+
+// Instead implement custom formatter:
+// https://doc.rust-lang.org/rust-by-example/hello/print/print_display.html
 
 #[derive(Debug)]
 struct Owner(String);
