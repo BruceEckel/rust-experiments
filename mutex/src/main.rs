@@ -14,29 +14,30 @@ fn main() {
     let counter = Arc::new(Mutex::new(0));
     let (tx, rx) = channel();
     // Can clone the Sender (tx) but not the Receiver (rx).
-    // This is mpsc (multi producer single consumer).
+    // This is mpsc (multiple-producer single-consumer).
 
     for _ in 0..N {
         // These reference-count clones are captured by the 'move' on the lambda:
         let (letters, counter, tx) = (letters.clone(), counter.clone(), tx.clone());
         // ^^^ Name-shadowing seems appropriate here.
-        println!("{:?} {:?}", counter, letters); // Why no additonal clone() here?
+        println!("{:?} {:?}", counter, letters); // Why no additonal clone()s here?
         thread::spawn(move || {
-            // We're the only thread that can access the shared state when the lock is held.
-            // unwrap() because acquiring the lock blocks until it is successful.
-            // If acquiring the lock fails, panic is appropriate.
+            // Only this thread can access the shared state when the locks are held.
+            // `unwrap()` because acquiring a lock blocks until it is successful.
+            // If acquiring a lock fails, panic is appropriate.
             let mut data = letters.lock().unwrap();
             let mut count = counter.lock().unwrap();
             let alpha = *count + 65; // `count` is apparently also a u8.
             *data += &format!("{}", alpha as char); // alpha must be a u8.
             *count += 1;
             tx.send(format!("{count}: {data}"));
-            if *count == N {  // `N` forces `count` & `counter` to be u8.
+            if *count == N { // `N` forces `count` & `counter` to be u8.
                 tx.send(format!("done!"));
             }
-            // Locks unlock here when `data` and `count` go out of scope.
+            // Unlock here when `data` and `count` go out of scope.
         });
     }
+
     while let Ok(msg) = rx.recv() {
         println!("{msg}");
         if msg.starts_with("done") {
