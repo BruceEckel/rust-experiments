@@ -19,7 +19,7 @@ fn main() {
     for _ in 0..N {
         // These reference-count clones are captured by the 'move' on the lambda:
         let (letters, counter, tx) = (letters.clone(), counter.clone(), tx.clone());
-        // ^^^ Name-shadowing seems appropriate here.
+        // ^^^ Name-shadowing seems appropriate here. Arc::clone() is more idiomatic.
         println!("{:?} {:?}", counter, letters); // Why no additonal clone()s here?
         thread::spawn(move || {
             // Only this thread can access the shared state when the locks are held.
