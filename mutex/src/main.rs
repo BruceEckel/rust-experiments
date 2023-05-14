@@ -1,41 +1,46 @@
+// A Mutex protects a shared variable from incorrect modification by multiple threads.
 #![allow(unused)]
 use std::sync::mpsc::channel;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
 fn main() {
-    const N: usize = 10;
-
-    // Spawn a few threads to increment a shared variable (non-atomically), and
-    // let the main thread know once all increments are done.
-    //
-    // Here we're using an Arc to share memory among threads, and the data inside
-    // the Arc is protected with a mutex.
-    let data = Arc::new(Mutex::new(0));
-
+    const N: u8 = 10;
+    // 'letters' and 'counter' and the tx channel are shared among the threads.
+    // Arc stands for "atomic reference count," and it shares memory among threads.
+    // The data inside the Arc is protected with a mutex.
+    // The data + Mutex is created on the heap and shared through the ref counted Arc:
+    let letters = Arc::new(Mutex::new(format!("")));
+    let counter = Arc::new(Mutex::new(0));
     let (tx, rx) = channel();
+    // Can clone the Sender (tx) but not the Receiver (rx).
+    // This is mpsc (multi producer single consumer).
+
     for _ in 0..N {
-        let (data, tx) = (Arc::clone(&data), tx.clone());
+        // These reference-count clones are captured by the 'move' on the lambda:
+        let (letters, counter, tx) = (letters.clone(), counter.clone(), tx.clone());
+        // ^^^ Name-shadowing seems appropriate here.
+        println!("{:?} {:?}", counter, letters); // Why no additonal clone() here?
         thread::spawn(move || {
-            // The shared state can only be accessed once the lock is held.
-            // Our non-atomic increment is safe because we're the only thread
-            // which can access the shared state when the lock is held.
-            //
-            // We unwrap() the return value to assert that we are not expecting
-            // threads to ever fail while holding the lock.
-            let mut count = data.lock().unwrap();
+            // We're the only thread that can access the shared state when the lock is held.
+            // unwrap() because acquiring the lock blocks until it is successful.
+            // If acquiring the lock fails, panic is appropriate.
+            let mut data = letters.lock().unwrap();
+            let mut count = counter.lock().unwrap();
+            let alpha = *count + 65; // `count` is apparently also a u8.
+            *data += &format!("{}", alpha as char); // alpha must be a u8.
             *count += 1;
-            tx.send(format!("{} ", *count));
-            if *count == N {
-                let msg = format!("done! {N}").to_string();
-                tx.send(msg).unwrap();
+            tx.send(format!("{count}: {data}"));
+            if *count == N {  // `N` forces `count` & `counter` to be u8.
+                tx.send(format!("done!"));
             }
-            // the lock is unlocked here when `data` goes out of scope.
+            // Locks unlock here when `data` and `count` go out of scope.
         });
     }
     while let Ok(msg) = rx.recv() {
         println!("{msg}");
+        if msg.starts_with("done") {
+            break;
+        };
     }
-    // ^^^ Doesn't end correctly, you have to ctrl-C
-    // println!("{}", rx.recv().unwrap());
 }
