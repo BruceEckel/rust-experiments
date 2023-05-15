@@ -1,11 +1,12 @@
 // A Mutex protects a shared variable from incorrect modification by multiple threads.
 #![allow(unused)]
+
 use std::sync::mpsc::channel;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
 fn main() {
-    const N: u8 = 10;
+    const N: u8 = 10_u8;
     // 'letters' and 'counter' and the tx channel are shared among the threads.
     // Arc stands for "atomic reference count," and it shares memory among threads.
     // The data inside the Arc is protected with a mutex.
@@ -18,9 +19,11 @@ fn main() {
 
     for _ in 0..N {
         // These reference-count clones are captured by the 'move' on the lambda:
-        let (letters, counter, tx) = (letters.clone(), counter.clone(), tx.clone());
-        // ^^^ Name-shadowing seems appropriate here. Arc::clone() is more idiomatic.
-        println!("{:?} {:?}", counter, letters); // Why no additonal clone()s here?
+        let (letters, counter, tx) = (Arc::clone(&letters), Arc::clone(&counter), tx.clone());
+        // ^^^ Name-shadowing seems appropriate here.
+        // Arc::clone(&letters) is more idiomatic, but letters.clone() is cleaner and more consistent.
+        // (Especially because Arc::clone(tx) doesn't seem possible, with or without an '&').
+        println!("{:?} {:?}", counter, letters); // Why no additional clone()s here?
         thread::spawn(move || {
             // Only this thread can access the shared state when the locks are held.
             // `unwrap()` because acquiring a lock blocks until it is successful.
