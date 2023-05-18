@@ -5,10 +5,10 @@
 // format!() seems more expedient than String::from()
 
 fn main() {
-    let _w = "world!";
-    let _b = Box::new("Hello, ".to_owned() + _w);  // Can't do any formatting with {}
-    println!("{_b}");
-    let g = String::from("Goodbye, ".to_owned() + _w);  // Can't do any formatting with {}
+    let w = "world!";
+    let b = Box::new("Hello, ".to_owned() + w);  // Can't do any formatting with {}
+    println!("{b}");
+    let g = String::from("Goodbye, ".to_owned() + w);  // Can't do any formatting with {}
     println!("{g}");
     let f = format!("{} ...Goodbye...", g); // Can do all the formatting you want...
     println!("{f}");

@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c7ef223f-7c4c-4b01-9e49-6741c336b5e3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/strings/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/strings/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -35,18 +34,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "C:/Git/rust-experiments",
-    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/strings/src/main.rs": "true",
-    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/Cargo.toml": "true",
-    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/src/lib.rs": "true",
-    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/src/main.rs": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Git/rust-experiments&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/strings/src/main.rs&quot;: &quot;true&quot;,
+    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/Cargo.toml&quot;: &quot;true&quot;,
+    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/src/lib.rs&quot;: &quot;true&quot;,
+    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/src/main.rs&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
     <option name="version" value="2" />
@@ -54,7 +53,7 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="0d0fd9b0-24ec-41dc-abc1-37f92cfde383" name="Changes" comment="" />
+      <changelist id="c7ef223f-7c4c-4b01-9e49-6741c336b5e3" name="Changes" comment="" />
       <created>1684195647014</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
