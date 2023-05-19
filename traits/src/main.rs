@@ -1,3 +1,28 @@
+// #![allow(dead_code)]
+
+fn _normal_trait() {
+    struct SomeType {}
+    trait MyTrait {}
+    impl MyTrait for SomeType {}
+}
+
+fn _trait_object() {
+    struct SomeType {}
+    trait MyTrait {}
+    impl MyTrait for SomeType {}
+    // A "trait object" must use `dyn`:
+    impl dyn MyTrait {}
+}
+
+fn _trait_object2() {
+    trait MyTrait {}
+    impl dyn MyTrait {}
+
+    trait AnotherTrait {}
+    impl AnotherTrait for dyn MyTrait {}
+}
+
+
 struct Sheep { naked: bool, name: &'static str }
 
 trait Animal {
