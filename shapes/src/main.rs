@@ -63,36 +63,16 @@ fn main() {
     vec_of_shapes();
 }
 
-fn vec_of_shapes() {  // More advanced...
-    struct Shapes<'a> {
-        shapes: Vec<Box<&'a dyn Shape>>,
-    }
-
-    impl Shapes<'_> {
-        fn new() -> Shapes<'static> {
-            Shapes {
-                shapes: vec![
-                    Box::new(&Circle { radius: 11 }),
-                    Box::new(&Rectangle { length: 12, width: 13, }),
-                    Box::new(&Circle { radius: 14 }),
-                    Box::new(&Rectangle { length: 15, width: 16, }),
-                ]
-            }
-        }
-    }
-
+fn vec_of_shapes() {
+    // Rust can't infer the type here:
     let shapes: Vec<Box<&dyn Shape>> = vec![
-            Box::new(&Circle { radius: 11 }),
-            Box::new(&Rectangle { length: 12, width: 13, }),
-            Box::new(&Circle { radius: 14 }),
-            Box::new(&Rectangle { length: 15, width: 16, }),
-        ];
+        Box::new(&Circle { radius: 11 }),
+        Box::new(&Rectangle { length: 12, width: 13 }),
+        Box::new(&Circle { radius: 14 }),
+        Box::new(&Rectangle { length: 15, width: 16 }),
+    ];
 
-    for shape in Shapes::new().shapes.iter() {
-        show_dyn(**shape);
-    }
     for shape in shapes.iter() {
         show_dyn(**shape);
     }
 }
-
