@@ -35,7 +35,7 @@ fn show_dyn(s: &dyn Shape) {
 // Shape isn't automatically burdened with a vtable!
 
 // Like C++ templates--new version generated for each argument type:
-fn show_impl(s: &impl Shape) {
+fn show_impl(s: impl Shape) {
     s.draw();
 }
 // Invisible automatically-generated function overloading!
@@ -53,17 +53,17 @@ fn main() {
         // show_impl(shape);
     }
     let (c, r) = (
-        &Circle { radius: 4 },
-        &Rectangle { length: 5, width: 6, },
+        Circle { radius: 4 },
+        Rectangle { length: 5, width: 6, },
     );
     show_impl(c); // Creates a version of show_impl() for Circle
     show_impl(r); // Creates a version of show_impl() for Square
-    // show_impl(SHAPES[0]);  // Doesn't know the type
+    // show_impl(*SHAPES[0]);  // Doesn't know the type
 
     vec_of_shapes();
 }
 
-fn vec_of_shapes() {
+fn vec_of_shapes() {  // More advanced...
     struct Shapes<'a> {
         shapes: Vec<Box<&'a dyn Shape>>,
     }
@@ -81,8 +81,17 @@ fn vec_of_shapes() {
         }
     }
 
-    let s = Shapes::new();
-    for shape in s.shapes.iter() {
+    let shapes: Vec<Box<&dyn Shape>> = vec![
+            Box::new(&Circle { radius: 11 }),
+            Box::new(&Rectangle { length: 12, width: 13, }),
+            Box::new(&Circle { radius: 14 }),
+            Box::new(&Rectangle { length: 15, width: 16, }),
+        ];
+
+    for shape in Shapes::new().shapes.iter() {
+        show_dyn(**shape);
+    }
+    for shape in shapes.iter() {
         show_dyn(**shape);
     }
 }
