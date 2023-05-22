@@ -26,10 +26,15 @@ fn main() {
         println!("dynamic({})", type_of(&a));
     }
     dynamic(base_animal);
+
+    println!("dynamic as *const (): {:p}", dynamic as *const ());
+    println!("auto_overload as *const (): {:p}", auto_overload<Dog> as *const ());
+    // The previous line produces:
+    // error[E0282]: type annotations needed
+    //   --> src\main.rs:31:50
+    //    |
+    // 31 |     println!("auto_overload as *const (): {:p}", auto_overload as *const ());
+    //    |                                                  ^^^^^^^^^^^^^ cannot infer type for type parameter `impl Animal` declared on the function `auto_overload`
+
+    // What would a correcting type annotation look like?
 }
-/*
-auto_overload(overloading::Dog)
-auto_overload(overloading::Cat)
-auto_overload(overloading::Giraffe)
-dynamic(&dyn overloading::Animal)
- */
