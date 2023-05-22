@@ -28,7 +28,7 @@ fn main() {
     dynamic(base_animal);
 
     println!("dynamic as *const (): {:p}", dynamic as *const ());
-    println!("auto_overload as *const (): {:p}", auto_overload<Dog> as *const ());
+    // println!("auto_overload as *const (): {:p}", auto_overload::<Dog> as *const ());
     // The previous line produces:
     // error[E0282]: type annotations needed
     //   --> src\main.rs:31:50
@@ -37,4 +37,13 @@ fn main() {
     //    |                                                  ^^^^^^^^^^^^^ cannot infer type for type parameter `impl Animal` declared on the function `auto_overload`
 
     // What would a correcting type annotation look like?
+    // (Apparently this cannot be done...)
+
+    // Shows that generics create a different function for each type parameter:
+    fn generic_address<A: Animal>(a: A) {
+        println!("generic_address({})", type_of(&a));
+    }
+    dbg!(generic_address::<Dog> as *const ());
+    dbg!(generic_address::<Cat> as *const ());
+    dbg!(generic_address::<Giraffe> as *const ());
 }
