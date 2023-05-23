@@ -1,0 +1,10 @@
+[package]
+name = "threadpool_async"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+futures = { version = "0.3.28", features = ["thread-pool", "executor"] }
+threadpool = "1.8.1"
