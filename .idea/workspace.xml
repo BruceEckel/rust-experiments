@@ -43,6 +43,8 @@
     "last_opened_file_path": "C:/git/rust-experiments/const_functions/src",
     "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
     "org.rust.hideNoCargoProjectNotificationsC:/Git/rust-experiments/tokio_basics/src/main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/Git/rust-experiments/tokio_select/Cargo.toml": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/Git/rust-experiments/tokio_select/src/main.rs": "true",
     "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/const_functions/src/main.rs": "true",
     "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/const_functions/src/second_main.rs": "true",
     "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/display/Cargo.toml": "true",
