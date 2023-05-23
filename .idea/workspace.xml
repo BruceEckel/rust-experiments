@@ -39,8 +39,10 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "full.screen.before.presentation.mode": "false",
     "last_opened_file_path": "C:/git/rust-experiments/const_functions/src",
     "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/Git/rust-experiments/tokio_basics/src/main.rs": "true",
     "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/const_functions/src/main.rs": "true",
     "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/const_functions/src/second_main.rs": "true",
     "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/display/Cargo.toml": "true",
@@ -54,7 +56,7 @@
     "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/src/main.rs": "true",
     "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/traits/src/main.rs": "true",
     "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/type_name_of/src/main.rs": "true",
-    "settings.editor.selected.configurable": "preferences.updates"
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
   <component name="RecentsManager">

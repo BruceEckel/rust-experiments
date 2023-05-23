@@ -28,7 +28,7 @@ fn main() {
     dbg!(type_of(&f));
     fn g(i:i32, j: &str) {}
     dbg!(type_of(&g));
-}
+ }
 /* Functions don't include argument type information:
 [src\main.rs:16] type_of(&int_var) = "i32"
 [src\main.rs:17] type_of(&float_var) = "f64"
