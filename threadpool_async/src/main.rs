@@ -1,7 +1,9 @@
 // From https://docs.rs/futures/0.3.28/futures/ (which didn't include the `use` statements)
-use futures::executor::*;
-use futures::StreamExt;
-use futures::channel::mpsc;
+use futures::{
+    executor::{ThreadPool, block_on},
+    StreamExt,
+    channel::mpsc,
+};
 
 fn main() {
     let pool = ThreadPool::new().expect("Failed to build pool");
@@ -30,13 +32,9 @@ fn main() {
         // responsible for transmission
         pool.spawn_ok(fut_tx_result);
 
-        let fut_values = rx
-            .map(|v| v * 2)
-            .collect();
-
         // Use the executor provided to this async block to wait for the
         // future to complete.
-        fut_values.await
+        rx.map(|v| v * 2).collect().await
     };
 
     // Actually execute the above future, which will invoke Future::poll and
