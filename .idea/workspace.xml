@@ -35,33 +35,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;full.screen.before.presentation.mode&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/git/rust-experiments/const_functions/src&quot;,
-    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/Git/rust-experiments/tokio_basics/src/main.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/Git/rust-experiments/tokio_select/Cargo.toml&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/Git/rust-experiments/tokio_select/src/main.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/const_functions/src/main.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/const_functions/src/second_main.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/display/Cargo.toml&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/display/src/foo.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/overloading/src/main.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/shapes/src/main.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/show_types/src/main.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/strings/src/main.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/threadpool_async/src/main.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/Cargo.toml&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/src/lib.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/src/main.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/traits/src/main.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/type_name_of/src/main.rs&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "full.screen.before.presentation.mode": "false",
+    "last_opened_file_path": "C:/git/rust-experiments/const_functions/src",
+    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/Git/rust-experiments/tcp_listener/src/main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/Git/rust-experiments/tokio_basics/src/main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/Git/rust-experiments/tokio_select/Cargo.toml": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/Git/rust-experiments/tokio_select/src/main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/const_functions/src/main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/const_functions/src/second_main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/display/Cargo.toml": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/display/src/foo.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/overloading/src/main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/shapes/src/main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/show_types/src/main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/strings/src/main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/threadpool_async/src/main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/Cargo.toml": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/src/lib.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/timer_future/src/main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/traits/src/main.rs": "true",
+    "org.rust.hideNoCargoProjectNotificationsC:/git/rust-experiments/type_name_of/src/main.rs": "true",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\git\rust-experiments\const_functions\src" />
