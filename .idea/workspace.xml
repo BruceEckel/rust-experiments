@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="c7ef223f-7c4c-4b01-9e49-6741c336b5e3" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trait_objects/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/trait_objects/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,6 +40,8 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "full.screen.before.presentation.mode": "false",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "C:/git/rust-experiments/const_functions/src",
     "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
     "org.rust.hideNoCargoProjectNotificationsC:/Git/rust-experiments/tcp_listener/src/main.rs": "true",
