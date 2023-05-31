@@ -16,3 +16,5 @@ Cargo.lock
 *.pdb
 *.xml
 *.xml
+trait_objects/src/workshop.txt
+.idea/workspace.xml
