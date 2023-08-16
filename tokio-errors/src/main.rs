@@ -24,7 +24,7 @@ async fn main() {
     for (i, result) in results.into_iter().enumerate() {
         match result {
             Ok(res) => match res {
-                Ok(_) => println!("Task {} Success.", i + 1),
+                Ok(_) => println!("Task {} Success", i + 1),
                 Err(err_msg) => println!("Task {}: {}", i + 1, err_msg),
             },
             Err(join_err) => println!("Task {} encountered a join error: {:?}", i + 1, join_err),
