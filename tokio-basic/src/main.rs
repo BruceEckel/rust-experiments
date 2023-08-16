@@ -54,7 +54,6 @@ fn create_tasks() -> TaskIterator {
 async fn scenario2() {
     println!("Scenario 2");
     // This starts all tasks at once:
-    // let tasks = create_tasks();
     for task in create_tasks() {
         let handle = task.lock().await.take().unwrap();
         handle.await.unwrap();
