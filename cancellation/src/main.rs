@@ -36,12 +36,14 @@ async fn main() {
     sleep(Duration::from_secs(5)).await;
 
     // Cancel the task by sending a signal
-    if cancel_tx.send(()).is_err() {
-        println!("Failed to send cancellation signal.");
-    }
+    // if cancel_tx.send(()).is_err() {
+    //     println!("Failed to send cancellation signal.");
+    // }
+    cancel_tx.send(()).unwrap();
 
     // Await the task to finish
-    if let Err(e) = task_handle.await {
-        println!("Task panicked: {:?}", e);
-    }
+    // if let Err(e) = task_handle.await {
+    //     println!("Task panicked: {:?}", e);
+    // }
+    task_handle.await.unwrap();
 }
