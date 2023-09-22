@@ -4,13 +4,10 @@ use std::thread;
 use std::time::Instant;
 use tokio::runtime::Runtime;
 
-pub async fn rand_int_yield(rng: &mut StdRng) -> i32 {
-    tokio::task::yield_now().await; // Allow context switch
-    rng.gen_range(0..100)
-}
-
-pub async fn rand_int_no_yield(rng: &mut StdRng) -> i32 {
-    // No context switch
+pub async fn rand_int(rng: &mut StdRng, yielding: bool) -> i32 {
+    if yielding {
+        tokio::task::yield_now().await; // Allow context switch
+    }
     rng.gen_range(0..100)
 }
 
@@ -42,12 +39,12 @@ pub fn run_tasks(rt: Runtime) {
 
         let task_one = tokio::spawn(calculation("one", |rng| {
             let mut cloned_rng = rng.clone();
-            let future = async move { rand_int_yield(&mut cloned_rng).await };
+            let future = async move { rand_int(&mut cloned_rng, true).await };
             Box::pin(future)
         }));
         let task_two = tokio::spawn(calculation("two", |rng| {
             let mut cloned_rng = rng.clone();
-            let future = async move { rand_int_no_yield(&mut cloned_rng).await };
+            let future = async move { rand_int(&mut cloned_rng, true).await };
             Box::pin(future)
         }));
 
