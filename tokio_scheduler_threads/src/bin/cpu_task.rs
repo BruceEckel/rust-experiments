@@ -1,9 +1,7 @@
-use rand::rngs::StdRng;
-use rand::{Rng, SeedableRng};
 use std::thread;
 use std::time::Instant;
-use tokio::runtime::Runtime;
 
+<<<<<<< HEAD
 pub async fn rand_int(rng: &mut StdRng, yielding: bool) -> i32 {
     if yielding {
         tokio::task::yield_now().await; // Allow context switch
@@ -22,10 +20,15 @@ where
         current_thread.name().unwrap_or("[unnamed]"),
         current_thread.id()
     );
+=======
+pub fn cpu_bound_task(name: &str, iterations: usize) {
+    let current_thread = thread::current();
+    println!("{} starts on thread: {:?} (id: {:?})", name, current_thread.name().unwrap_or("[unnamed]"), current_thread.id());
+>>>>>>> parent of 471892c (random generator with yield, run_tasks())
     let start = Instant::now();
-    let mut rng: StdRng = SeedableRng::from_seed([42; 32]);
 
     let mut x = 0;
+<<<<<<< HEAD
     for _ in 0..1_000_000 {
         x += (rand_func(&mut rng)).await;
     }
@@ -53,4 +56,11 @@ pub fn run_tasks(rt: Runtime) {
 
         println!("Duration: {:?}", start.elapsed());
     });
+=======
+    for _ in 0..iterations {
+        x += 1;
+    }
+
+    println!("{} ends after {:?}: {}", name, start.elapsed(), x);
+>>>>>>> parent of 471892c (random generator with yield, run_tasks())
 }
