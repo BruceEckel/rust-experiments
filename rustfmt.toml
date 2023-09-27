@@ -1,0 +1,6 @@
+# unstable_features = true
+# https://rust-lang.github.io/rustfmt
+max_width = 47
+# comment_width = 47
+chain_width = 47
+# wrap_comments = true
