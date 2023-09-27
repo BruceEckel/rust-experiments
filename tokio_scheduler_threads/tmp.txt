@@ -1,0 +1,210 @@
+As I continue delving deeper into the vagaries of concurrency, two things become clear:
+
+The programming community is still figuring it out. We are doing more experiments and some things like async/await provide decent solutions for many situations, but no one universal answer has yet presented itself (and such an answer may not exist).
+
+Right now concurrency is a bag of strategies that you apply depending on the details of the problem you are solving. Note that concurrency is a subset of the general problem of performance optimization, which also has no single solution and is also a collection of strategies.
+
+That said, we do seem to periodically have insights about improvements. Both the ZIO (Scala) library and the JVM’s project Loom are able to provide concurrency without requiring the programmer to mark suspension points explicitly in their code (as we must with await). In ZIO, because of the math, any time a flatmap occurs (whenever an effect is applied), that task can be suspended. With Loom, I surmise that the JVM can suspend a task between JVM opcodes (possibly only certain opcodes, perhaps all—I’m purely guessing here).
+
+Somehow the underlying system (which can include one or both of the compiler and the runtime depending on your language and library) must be able to know where the safe suspension points are. This allows it to save and restore only the tiny subset of data & state necessary for the current task. Without this information, the system must “save the world,” which is why threads are so limited in quantity and slow during context switches: they don’t know what subset of information needs saving, so they must save the whole stack. If the system knows more about the source code and the suspension points, it can save only what is necessary, typically a subset of the task’s local variables. This is a tiny amount compared to what a thread must save, so a system that determines safe suspension points (like async/await) can have millions of tasks, while you are limited to, at best, a few thousand threads. This limitation usually adds the need for thread-sharing schemes, which you don’t have to think about with async/await.
+
+When learning concurrency, especially if you start with the specific strategy of async/await, it can be easy to fall into the mental model that the only thing that slows down your program is IO, which relies on external systems that are out of our control and take an unknown amount of time. This means that all await operations are ultimately connected to IO—Even the timers used in calls to sleep reside external to the CPU cores, and so are also IO. Thus, with async/await, all blocking operations block because of IO.
+
+It took me a while to get to the “understanding” that blocking == IO. Then I read something by John de Goes that pointed out this fundamental conceptual error. The important thing is that some task is taking too long, which is preventing the progress of other tasks. It doesn’t matter to your program why that task is blocking the progress of the other tasks—yes, the culprit is very often IO, and IO is clearly distinguished so it’s easy to treat it as a suspension point. But just because IO is the easy target here, that does not mean that async/await solves all your concurrency problems. It only solves IO concurrency problems, but not the general problem of “a function that takes too long.”
+
+Problem Term: “Blocking”
+
+The term blocking deserves an aside here, because it is one of numerous terms casually used in multiple ways, confusing newcomers. Even in introductory narratives, these terms are often used with the attitude that “everyone obviously already knows this,”  an attitude that those with the curse of knowledge are unfortunately prone.
+
+The general, and more intuitive meaning of block is to prevent the progress of other tasks. Task B blocks the progress of Task A if A relies on some resource provided by B (including the answer to a calculation) that B is taking its time to produce. Note that this is the essential definition because, ultimately, the only reason we’re messing with concurrency is that we need to produce results more quickly. We’ve broken our program into tasks and we’re trying to get those tasks, working together, to produce results more quickly than the linear version of the program.
+
+Writers will also say that something “is blocked,” which by itself is not terrible. In the above example, Task B is blocking the progress of Task A, so Task A is blocked by Task B.
+
+Is blocked appears to produce the unfortunate term blocks, as in “Task A blocks.” This is quite confusing because suddenly Task A seems to have a new internal quality that it can, what, block itself? Just randomly decide to stop? I suspect this situation arose because, initially, the majority of concurrency experts came from an environment where only threads were available, and they were used to thinking in lower-level terms.
+
+When we have coroutines (such as async/await), the idea of one task blocking another still exists. Since we now have a cooperative system, a task suspends itself rather than being forced to stop externally. So it is more useful to say that when a task is blocked by another task, it suspends itself.
+
+Another problem term: “Thread”
+
+While I’m on the subject of terminology, thread is another challenge. Ultimately, everything is run by a thread—when you create an OS process, it automatically gets a thread, the “main” thread, to execute the code in that process.
+
+Here’s the first problem with the way the term “thread” is used:
+
+This main thread can in turn spawn other threads to run tasks concurrently.
+
+Notice how casually I conflated “thread” with “code that is being run by that thread.” It’s actually the latter that spawns the thread and saying that “the thread did it,” while on some level sort-of correct, it’s confusing. But you’ll see this all the time and you have to mentally say “the thread is just the mechanism that’s driving the task.”
+
+Original concurrency systems put you in direct touch with the thread with the OS controlling the (preemptive) context switches. But coroutines are cooperative and the context switches happen at known points (rather than at any instant, as with threads). While the “execution mechanism” is grabbed away from the task by the OS with threading, that mechanism is voluntarily yielded by the code in a coroutine (whenever an async function is called).
+
+So the second problem is that, even though everything is ultimately driven by a thread, OS thread context switches are controlled by the OS and happen at any instant. Coroutine systems use their own, higher-level system to voluntarily produce context switches at safe suspension points. For example, in Python the execution mechanism called the event loop. Other systems call these higher-level-and-voluntary but still thread-like elements by a different name, such as green threads or virtual threads or fibers or user-mode threads or lightweight threads, etc. Apparently people wanted to hold on to the idea of threads (which, again, are actually driving everything, so that’s confusing), while replacing the concept of OS context switching (which is still going on, just not in a way that affects the coroutine, so that’s also confusing) with cooperative context switching.
+
+With coroutines, both the idea that the OS thread is driving everything and awareness of the OS context switches are both hidden by the abstraction. So holding on to the term thread is confusing and counter-productive for novices, and adds cognitive load to experts. Although I acknowledge that there are tons of articles that treat the term thread casually, I think it would be useful to have a term that abstracts the idea of execution mechanism (something like “executor” might work, even with existing usage). I think this would also discourage the conflation of the execution mechanism with the code that is being executed.
+
+Coroutines vs. Parallelism
+
+In the Wikipedia Article on Coroutines, it says:
+
+“Coroutines provide concurrency, because they allow tasks to be performed out of order or in a changeable order, without changing the overall outcome, but they do not provide parallelism, because they do not execute multiple tasks simultaneously.”
+
+This certainly fits with Python’s event loop, which is only ever runs one thing at a time—this constraint is often attributed to Python’s global interpreter lock (GIL), but the above definition makes it appear that non-parallelism is intrinsic to the definition of coroutines.
+
+But is this true? In Go, coroutines automatically run in parallel (although I occasionally look at Go, I only find it interesting for its design choices).
+
+Rust’s tokio library uses multiple threads by default for its async, although you can tell it to use a single thread. Here’s an example (source code) that tests both:
+
+use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
+use std::thread;
+use std::time::Instant;
+use tokio::runtime::Builder;
+use tokio::runtime::Runtime;
+
+pub async fn rand_int(
+    rng: &mut StdRng,
+    yielding: bool,
+) -> i32 {
+    if yielding {
+        // Allow context switch
+        tokio::task::yield_now().await;
+    }
+    rng.gen_range(0..100)
+}
+
+pub async fn calculation(
+    name: &str,
+    yielding: bool,
+) {
+    println!(
+        "\nStarting '{}' with yielding {}",
+        name, yielding
+    );
+    let current_thread = thread::current();
+    println!(
+        "'{}' on thread {:?} (id: {:?})",
+        name,
+        current_thread.name().unwrap_or("X"),
+        current_thread.id()
+    );
+    let start = Instant::now();
+    let mut rng: StdRng =
+        SeedableRng::from_seed([42; 32]);
+    let mut x = 0;
+    for _ in 0..1_000_000 {
+        x += (rand_int(&mut rng, yielding))
+            .await;
+    }
+    println!(
+        "Task '{}' ends after {:?}: {}",
+        name,
+        start.elapsed(),
+        x
+    );
+}
+
+pub fn run_tasks(
+    rt: &Runtime,
+    yielding: bool,
+) {
+    let start = Instant::now();
+    rt.block_on(async {
+        let task_one = tokio::spawn(
+            calculation("one", yielding),
+        );
+        let task_two = tokio::spawn(
+            calculation("two", yielding),
+        );
+        let _ = tokio::try_join!(
+            task_one, task_two
+        );
+    });
+    println!("=> Elapsed: {:?}", start.elapsed());
+}
+
+fn main() {
+    println!("Single-threaded tokio async");
+    let rts = Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    run_tasks(&rts, false);
+    run_tasks(&rts, true);
+
+    println!("\nMulti-threaded tokio async");
+    let rtm = Builder::new_multi_thread()
+        .enable_all()
+        .worker_threads(2)
+        .build()
+        .unwrap();
+    run_tasks(&rtm, false);
+    run_tasks(&rtm, true);
+}
+
+rand_int() produces a random number while giving the opportunity to yield (depending on the yielding flag). Yielding produces a context switch, otherwise rand_int() runs to completion without ever giving up the thread.
+
+calculation() sums a million random numbers, repeating the random-generator seed for each call to calculation() so it produces the same result each time. It also displays information about the thread it is using.
+
+run_tasks() takes a Runtime object and runs two calculation() tasks against each other, timing them. In main(), two different Runtimes are created, one with a single thread and one with two threads. Each Runtime is tested with a yielding value of both false and true.
+
+Here’s the output:
+
+Single-threaded tokio async
+
+Starting 'one' with yielding false
+'one' on thread "main" (id: ThreadId(1))
+Task 'one' ends after 6.9647ms: 49485726
+
+Starting 'two' with yielding false
+'two' on thread "main" (id: ThreadId(1))
+Task 'two' ends after 6.6995ms: 49485726
+=> Elapsed: 13.8545ms
+
+Starting 'one' with yielding true
+'one' on thread "main" (id: ThreadId(1))
+
+Starting 'two' with yielding true
+'two' on thread "main" (id: ThreadId(1))
+Task 'one' ends after 2.8203043s: 49485726
+Task 'two' ends after 2.8203182s: 49485726
+=> Elapsed: 2.8203759s
+
+Multi-threaded tokio async
+
+Starting 'one' with yielding false
+'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+
+Starting 'two' with yielding false
+'two' on thread "tokio-runtime-worker" (id: ThreadId(3))
+Task 'two' ends after 6.4187ms: 49485726
+Task 'one' ends after 6.4605ms: 49485726
+=> Elapsed: 7.0885ms
+
+Starting 'one' with yielding true
+'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+
+Starting 'two' with yielding true
+'two' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Task 'two' ends after 396.9044ms: 49485726
+Task 'one' ends after 399.9465ms: 49485726
+=> Elapsed: 400.1947ms
+
+The context switching seems very expensive. Note, however, that rand_int() doesn’t do that much so the context switch becomes a significant part of that task. If your task contains more activity then the context switch will have less of an impact (note that this is the kind of subtle thinking you must cultivate in order to understand concurrency issues).
+
+The Simplicity of Single-Threaded Async
+
+The previous example makes it seem obvious that you should use multiple threads to drive your coroutines as Go and tokio do. There’s an upside, however, to using a single-threaded execution mechanism for your coroutines: it reduces the possibility of race conditions.
+
+Thread Confinement: Taking it to the Extreme
+
+What’s the Best Default?
+
+In the episode of Happy Path Programming where we interview John de Goes, we spend the last 20 minutes exploring his ideas around this issue. He points out that—of course—“it depends on the problem you’re solving.”
+
+The default for most cases, he argues, is writing business software. That is also the case where you’re likely to get the least-experienced concurrency programmers, so the default choice is important here, to keep those programmers from making difficult mistakes.
+
+References:
+
+Here’s an article that talks about exactly this problem in Rust, and states that concurrency systems should be single-threaded by default.
+
+The State of Async Rust states: “Multi-threaded-by-default runtimes cause accidental complexity completely unrelated to the task of writing async code.” The article also makes a case for, in Rust, choosing threads before async.
+
+This goes further: “I recommend using ordinary (synchronous) Rust, with multithreading where you need concurrency, unless you have a reason to do otherwise.”

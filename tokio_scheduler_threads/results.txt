@@ -1,0 +1,39 @@
+Single-threaded tokio async
+
+Starting 'one' with yielding false
+'one' on thread "main" (id: ThreadId(1))
+Task 'one' ends after 6.9647ms: 49485726
+
+Starting 'two' with yielding false
+'two' on thread "main" (id: ThreadId(1))
+Task 'two' ends after 6.6995ms: 49485726
+=> Elapsed: 13.8545ms
+
+Starting 'one' with yielding true
+'one' on thread "main" (id: ThreadId(1))
+
+Starting 'two' with yielding true
+'two' on thread "main" (id: ThreadId(1))
+Task 'one' ends after 2.8203043s: 49485726
+Task 'two' ends after 2.8203182s: 49485726
+=> Elapsed: 2.8203759s
+
+Multi-threaded tokio async
+
+Starting 'one' with yielding false
+'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+
+Starting 'two' with yielding false
+'two' on thread "tokio-runtime-worker" (id: ThreadId(3))
+Task 'two' ends after 6.4187ms: 49485726
+Task 'one' ends after 6.4605ms: 49485726
+=> Elapsed: 7.0885ms
+
+Starting 'one' with yielding true
+'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+
+Starting 'two' with yielding true
+'two' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Task 'two' ends after 396.9044ms: 49485726
+Task 'one' ends after 399.9465ms: 49485726
+=> Elapsed: 400.1947ms

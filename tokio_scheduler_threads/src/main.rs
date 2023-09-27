@@ -26,21 +26,19 @@ pub async fn calculation(
     );
     let current_thread = thread::current();
     println!(
-        "'{}' starts on thread {:?} (id: {:?})",
+        "'{}' on thread {:?} (id: {:?})",
         name,
-        current_thread.name().unwrap_or("[unnamed]"),
+        current_thread.name().unwrap_or("X"),
         current_thread.id()
     );
     let start = Instant::now();
     let mut rng: StdRng =
         SeedableRng::from_seed([42; 32]);
-
     let mut x = 0;
     for _ in 0..1_000_000 {
         x += (rand_int(&mut rng, yielding))
             .await;
     }
-
     println!(
         "Task '{}' ends after {:?}: {}",
         name,
@@ -53,8 +51,8 @@ pub fn run_tasks(
     rt: &Runtime,
     yielding: bool,
 ) {
+    let start = Instant::now();
     rt.block_on(async {
-        let start = Instant::now();
         let task_one = tokio::spawn(
             calculation("one", yielding),
         );
@@ -64,11 +62,8 @@ pub fn run_tasks(
         let _ = tokio::try_join!(
             task_one, task_two
         );
-        println!(
-            "Duration: {:?}",
-            start.elapsed()
-        );
     });
+    println!("=> Elapsed: {:?}", start.elapsed());
 }
 
 fn main() {
@@ -77,8 +72,8 @@ fn main() {
         .enable_all()
         .build()
         .unwrap();
-    run_tasks(&rts, true);
     run_tasks(&rts, false);
+    run_tasks(&rts, true);
 
     println!("\nMulti-threaded tokio async");
     let rtm = Builder::new_multi_thread()
@@ -86,6 +81,6 @@ fn main() {
         .worker_threads(2)
         .build()
         .unwrap();
-    run_tasks(&rtm, true);
     run_tasks(&rtm, false);
+    run_tasks(&rtm, true);
 }
