@@ -4,7 +4,7 @@ The programming community is still figuring it out. We are doing more experiment
 
 Right now concurrency is a bag of strategies that you apply depending on the details of the problem you are solving. Note that concurrency is a subset of the general problem of performance optimization, which also has no single solution and is also a collection of strategies.
 
-That said, we do seem to periodically have insights about improvements. Both the ZIO (Scala) library and the JVM’s project Loom are able to provide concurrency without requiring the programmer to mark suspension points explicitly in their code (as we must with await). In ZIO, because of the math, any time a flatmap occurs (whenever an effect is applied), that task can be suspended. With Loom, I surmise that the JVM can suspend a task between JVM opcodes (possibly only certain opcodes, perhaps all—I’m purely guessing here).
+That said, we do seem to periodically have insights about improvements. Both the ZIO (Scala) library and the JVM’s project Loom are able to provide concurrency without requiring the programmer to mark suspension points explicitly in their code (as we must with await). In ZIO, because of the math, any time a flatmap occurs (whenever an effect is applied), that task can be suspended. With Loom, I surmise that the JVM can suspend a task between JVM opcodes (possibly only certain opcodes, perhaps all—I’m purely guessing here). 
 
 Somehow the underlying system (which can include one or both of the compiler and the runtime depending on your language and library) must be able to know where the safe suspension points are. This allows it to save and restore only the tiny subset of data & state necessary for the current task. Without this information, the system must “save the world,” which is why threads are so limited in quantity and slow during context switches: they don’t know what subset of information needs saving, so they must save the whole stack. If the system knows more about the source code and the suspension points, it can save only what is necessary, typically a subset of the task’s local variables. This is a tiny amount compared to what a thread must save, so a system that determines safe suspension points (like async/await) can have millions of tasks, while you are limited to, at best, a few thousand threads. This limitation usually adds the need for thread-sharing schemes, which you don’t have to think about with async/await.
 
@@ -14,11 +14,11 @@ It took me a while to get to the “understanding” that blocking == IO. Then I
 
 Problem Term: “Blocking”
 
-The term blocking deserves an aside here, because it is one of numerous terms casually used in multiple ways, confusing newcomers. Even in introductory narratives, these terms are often used with the attitude that “everyone obviously already knows this,”  an attitude that those with the curse of knowledge are unfortunately prone.
+The term blocking deserves an aside here, because it is one of numerous terms casually used in multiple ways, confusing newcomers. Even in introductory narratives, these terms are often used with the attitude that “everyone obviously already knows this,”  an attitude that those with the curse of knowledge are unfortunately prone. 
 
 The general, and more intuitive meaning of block is to prevent the progress of other tasks. Task B blocks the progress of Task A if A relies on some resource provided by B (including the answer to a calculation) that B is taking its time to produce. Note that this is the essential definition because, ultimately, the only reason we’re messing with concurrency is that we need to produce results more quickly. We’ve broken our program into tasks and we’re trying to get those tasks, working together, to produce results more quickly than the linear version of the program.
 
-Writers will also say that something “is blocked,” which by itself is not terrible. In the above example, Task B is blocking the progress of Task A, so Task A is blocked by Task B.
+Writers will also say that something “is blocked,” which by itself is not terrible. In the above example, Task B is blocking the progress of Task A, so Task A is blocked by Task B. 
 
 Is blocked appears to produce the unfortunate term blocks, as in “Task A blocks.” This is quite confusing because suddenly Task A seems to have a new internal quality that it can, what, block itself? Just randomly decide to stop? I suspect this situation arose because, initially, the majority of concurrency experts came from an environment where only threads were available, and they were used to thinking in lower-level terms.
 
@@ -26,11 +26,11 @@ When we have coroutines (such as async/await), the idea of one task blocking ano
 
 Another problem term: “Thread”
 
-While I’m on the subject of terminology, thread is another challenge. Ultimately, everything is run by a thread—when you create an OS process, it automatically gets a thread, the “main” thread, to execute the code in that process.
+While I’m on the subject of terminology, thread is another challenge. Ultimately, everything is run by a thread—when you create an OS process, it automatically gets a thread, the “main” thread, to execute the code in that process. 
 
 Here’s the first problem with the way the term “thread” is used:
 
-This main thread can in turn spawn other threads to run tasks concurrently.
+This main thread can in turn spawn other threads to run tasks concurrently. 
 
 Notice how casually I conflated “thread” with “code that is being run by that thread.” It’s actually the latter that spawns the thread and saying that “the thread did it,” while on some level sort-of correct, it’s confusing. But you’ll see this all the time and you have to mentally say “the thread is just the mechanism that’s driving the task.”
 
@@ -46,37 +46,62 @@ In the Wikipedia Article on Coroutines, it says:
 
 “Coroutines provide concurrency, because they allow tasks to be performed out of order or in a changeable order, without changing the overall outcome, but they do not provide parallelism, because they do not execute multiple tasks simultaneously.”
 
-This certainly fits with Python’s event loop, which is only ever runs one thing at a time—this constraint is often attributed to Python’s global interpreter lock (GIL), but the above definition makes it appear that non-parallelism is intrinsic to the definition of coroutines.
+This certainly fits with Python’s event loop, which is only ever runs one thing at a time—this constraint is often attributed to Python’s global interpreter lock (GIL), but the above definition makes it appear that non-parallelism is intrinsic to the definition of coroutines. 
 
-But is this true? In Go, coroutines automatically run in parallel (although I occasionally look at Go, I only find it interesting for its design choices).
+But is this true? In Go, coroutines automatically run in parallel (although I occasionally look at Go, I only find it interesting for its design choices). 
 
 Rust’s tokio library uses multiple threads by default for its async, although you can tell it to use a single thread. Here’s an example (source code) that tests both:
 
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use std::ops::Range;
+use std::sync::Arc;
 use std::thread;
 use std::time::Instant;
-use tokio::runtime::Builder;
-use tokio::runtime::Runtime;
+use tokio::runtime::{Builder, Runtime};
+
+// Upper & lower percent AND random range:
+const SPAN: Range<i32> = 0..100;
+
+#[derive(Copy, Clone)]
+pub struct YieldPercent {
+    pub value: i32,
+}
+
+impl YieldPercent {
+    pub fn new(value: i32) -> Self {
+        Self {
+            value: value
+                .clamp(SPAN.start, SPAN.end),
+        }
+    }
+    pub fn list(values: &[i32]) -> Vec<Self> {
+        values
+            .iter()
+            .map(|&value| Self::new(value))
+            .collect()
+    }
+}
 
 pub async fn rand_int(
     rng: &mut StdRng,
-    yielding: bool,
+    yield_percent: &YieldPercent,
 ) -> i32 {
-    if yielding {
-        // Allow context switch
+    let random = rng.gen_range(SPAN);
+    // Probability-based context switch:
+    if random < yield_percent.value {
         tokio::task::yield_now().await;
     }
-    rng.gen_range(0..100)
+    random
 }
 
 pub async fn calculation(
     name: &str,
-    yielding: bool,
+    yield_percent: Arc<YieldPercent>,
 ) {
     println!(
-        "\nStarting '{}' with yielding {}",
-        name, yielding
+        "\nStart '{}' with yield_percent {}",
+        name, yield_percent.value
     );
     let current_thread = thread::current();
     println!(
@@ -90,8 +115,11 @@ pub async fn calculation(
         SeedableRng::from_seed([42; 32]);
     let mut x = 0;
     for _ in 0..1_000_000 {
-        x += (rand_int(&mut rng, yielding))
-            .await;
+        x += rand_int(
+            &mut rng,
+            &*yield_percent,
+        )
+        .await;
     }
     println!(
         "Task '{}' ends after {:?}: {}",
@@ -103,103 +131,201 @@ pub async fn calculation(
 
 pub fn run_tasks(
     rt: &Runtime,
-    yielding: bool,
+    yield_percent: YieldPercent,
 ) {
     let start = Instant::now();
+    let yield_percent =
+        Arc::new(yield_percent);
     rt.block_on(async {
-        let task_one = tokio::spawn(
-            calculation("one", yielding),
-        );
-        let task_two = tokio::spawn(
-            calculation("two", yielding),
-        );
+        let task_one =
+            tokio::spawn(calculation(
+                "one",
+                yield_percent.clone(),
+            ));
+        let task_two =
+            tokio::spawn(calculation(
+                "two",
+                yield_percent.clone(),
+            ));
         let _ = tokio::try_join!(
             task_one, task_two
         );
     });
-    println!("=> Elapsed: {:?}", start.elapsed());
+    println!(
+        "=> Elapsed: {:?}",
+        start.elapsed()
+    );
 }
 
 fn main() {
+    let yields = YieldPercent::list(&[
+        0, 5, 25, 50, 75, 100,
+    ]);
     println!("Single-threaded tokio async");
     let rts = Builder::new_current_thread()
         .enable_all()
         .build()
         .unwrap();
-    run_tasks(&rts, false);
-    run_tasks(&rts, true);
+    for yld in &yields {
+        run_tasks(&rts, *yld);
+    }
 
-    println!("\nMulti-threaded tokio async");
+    println!("\nTwo-threaded tokio async");
     let rtm = Builder::new_multi_thread()
         .enable_all()
         .worker_threads(2)
         .build()
         .unwrap();
-    run_tasks(&rtm, false);
-    run_tasks(&rtm, true);
+    for yld in &yields {
+        run_tasks(&rtm, *yld);
+    }
 }
 
-rand_int() produces a random number while giving the opportunity to yield (depending on the yielding flag). Yielding produces a context switch, otherwise rand_int() runs to completion without ever giving up the thread.
+const SPAN ensures that the two ranges in the program vary together. YieldPercent can only be created with a value in 0..100; the type guarantees this is true so I never have to check in any other place in the program (if you test for correctness of a value in multiple places, those checks can easily get out of sync). YieldPercent has the conventional new() for constructing YieldPercent. This uses clamp() so any value less than SPAN.start is set to SPAN.start, and any value greater than SPAN.end is set to SPAN.end. YieldPercent also contains a utility function list() that takes an array of i32 and produces a Vec of YieldPercent objects.
+
+rand_int() produces a random number while giving the opportunity to yield (depending on the yield_percent argument). Yielding produces a context switch, otherwise rand_int() runs to completion without ever giving up the execution mechanism.
 
 calculation() sums a million random numbers, repeating the random-generator seed for each call to calculation() so it produces the same result each time. It also displays information about the thread it is using.
 
-run_tasks() takes a Runtime object and runs two calculation() tasks against each other, timing them. In main(), two different Runtimes are created, one with a single thread and one with two threads. Each Runtime is tested with a yielding value of both false and true.
+run_tasks() takes a Runtime object and runs two calculation() tasks against each other, timing them. In main(), two different Runtimes are created, one with a single thread and one with two threads. Each Runtime is tested with a yielding value of both false and true. 
 
-Here’s the output:
+Here’s the output, produced with cargo run --release:
 
 Single-threaded tokio async
 
-Starting 'one' with yielding false
+Start 'one' with yield_percent 0
 'one' on thread "main" (id: ThreadId(1))
-Task 'one' ends after 6.9647ms: 49485726
+Task 'one' ends after 4.2425ms: 49485726
 
-Starting 'two' with yielding false
+Start 'two' with yield_percent 0
 'two' on thread "main" (id: ThreadId(1))
-Task 'two' ends after 6.6995ms: 49485726
-=> Elapsed: 13.8545ms
+Task 'two' ends after 4.2339ms: 49485726
+=> Elapsed: 8.5403ms
 
-Starting 'one' with yielding true
+Start 'one' with yield_percent 5
 'one' on thread "main" (id: ThreadId(1))
 
-Starting 'two' with yielding true
+Start 'two' with yield_percent 5
 'two' on thread "main" (id: ThreadId(1))
-Task 'one' ends after 2.8203043s: 49485726
-Task 'two' ends after 2.8203182s: 49485726
-=> Elapsed: 2.8203759s
+Task 'one' ends after 67.0209ms: 49485726
+Task 'two' ends after 67.0291ms: 49485726
+=> Elapsed: 67.0464ms
 
-Multi-threaded tokio async
+Start 'one' with yield_percent 25
+'one' on thread "main" (id: ThreadId(1))
 
-Starting 'one' with yielding false
-'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Start 'two' with yield_percent 25
+'two' on thread "main" (id: ThreadId(1))
+Task 'one' ends after 291.7032ms: 49485726
+Task 'two' ends after 291.7147ms: 49485726
+=> Elapsed: 291.733ms
 
-Starting 'two' with yielding false
-'two' on thread "tokio-runtime-worker" (id: ThreadId(3))
-Task 'two' ends after 6.4187ms: 49485726
-Task 'one' ends after 6.4605ms: 49485726
-=> Elapsed: 7.0885ms
+Start 'one' with yield_percent 50
+'one' on thread "main" (id: ThreadId(1))
 
-Starting 'one' with yielding true
-'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Start 'two' with yield_percent 50
+'two' on thread "main" (id: ThreadId(1))
+Task 'one' ends after 576.3094ms: 49485726
+Task 'two' ends after 576.3205ms: 49485726
+=> Elapsed: 576.3372ms
 
-Starting 'two' with yielding true
+Start 'one' with yield_percent 75
+'one' on thread "main" (id: ThreadId(1))
+
+Start 'two' with yield_percent 75
+'two' on thread "main" (id: ThreadId(1))
+Task 'two' ends after 852.1807ms: 49485726
+Task 'one' ends after 852.1994ms: 49485726
+=> Elapsed: 852.214ms
+
+Start 'one' with yield_percent 100
+'one' on thread "main" (id: ThreadId(1))
+
+Start 'two' with yield_percent 100
+'two' on thread "main" (id: ThreadId(1))
+Task 'one' ends after 1.1447089s: 49485726
+Task 'two' ends after 1.1447217s: 49485726
+=> Elapsed: 1.1447392s
+
+Two-threaded tokio async
+
+Start 'one' with yield_percent 0
+'one' on thread "tokio-runtime-worker" (id: ThreadId(3))
+
+Start 'two' with yield_percent 0
 'two' on thread "tokio-runtime-worker" (id: ThreadId(2))
-Task 'two' ends after 396.9044ms: 49485726
-Task 'one' ends after 399.9465ms: 49485726
-=> Elapsed: 400.1947ms
+Task 'one' ends after 4.1638ms: 49485726
+Task 'two' ends after 4.1867ms: 49485726
+=> Elapsed: 4.3831ms
 
-The context switching seems very expensive. Note, however, that rand_int() doesn’t do that much so the context switch becomes a significant part of that task. If your task contains more activity then the context switch will have less of an impact (note that this is the kind of subtle thinking you must cultivate in order to understand concurrency issues).
+Start 'one' with yield_percent 5
+'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+
+Start 'two' with yield_percent 5
+'two' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Task 'two' ends after 19.1569ms: 49485726
+Task 'one' ends after 19.2701ms: 49485726
+=> Elapsed: 19.3053ms
+
+Start 'one' with yield_percent 25
+'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+
+Start 'two' with yield_percent 25
+'two' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Task 'two' ends after 63.8873ms: 49485726
+Task 'one' ends after 65.9416ms: 49485726
+=> Elapsed: 66.0126ms
+
+Start 'one' with yield_percent 50
+'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+
+Start 'two' with yield_percent 50
+'two' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Task 'one' ends after 117.4881ms: 49485726
+Task 'two' ends after 120.3069ms: 49485726
+=> Elapsed: 120.3405ms
+
+Start 'two' with yield_percent 75
+'two' on thread "tokio-runtime-worker" (id: ThreadId(2))
+
+Start 'one' with yield_percent 75
+'one' on thread "tokio-runtime-worker" (id: ThreadId(3))
+Task 'one' ends after 173.6922ms: 49485726
+Task 'two' ends after 175.3486ms: 49485726
+=> Elapsed: 175.4175ms
+
+Start 'two' with yield_percent 100
+'two' on thread "tokio-runtime-worker" (id: ThreadId(3))
+
+Start 'one' with yield_percent 100
+'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Task 'two' ends after 224.6892ms: 49485726
+Task 'one' ends after 235.6701ms: 49485726
+=> Elapsed: 235.7067ms
+
+When there’s only one thread and no yielding (a yield_percent of zero) Task one runs to completion before Task two can start. If the yield_percent is nonzero, the two tasks interleave.
+
+If there’s only one thread, it runs on “main,” otherwise two new threads are allocated.
+
+If we plot the results (plotting code) we can see a very linear relationship between yield_percent and elapsed time:
+
+
+
+This plot indicates that using multiple threads to drive your coroutines is an obvious win. But it’s not quite that simple, as we shall see shortly.
+
+Context switching seems quite expensive. Note, however, that rand_int() is a very small function so the context switch becomes a significant part of that task. If your task contains more activity, the context switch will have less of an impact. In addition we are context-switching a million times per call to calculation(), and it’s more likely that you’ll make vastly fewer async calls. Note that it isn’t obvious that async calls will speed things up. This is the kind of subtle thinking you must cultivate in order to understand concurrency issues.
 
 The Simplicity of Single-Threaded Async
 
-The previous example makes it seem obvious that you should use multiple threads to drive your coroutines as Go and tokio do. There’s an upside, however, to using a single-threaded execution mechanism for your coroutines: it reduces the possibility of race conditions.
+The previous example makes it seem obvious that you should use multiple threads to drive your coroutines as Go and tokio do. However, a single-threaded execution mechanism has an upside: it reduces the possibility of race conditions.
 
 Thread Confinement: Taking it to the Extreme
 
 What’s the Best Default?
 
-In the episode of Happy Path Programming where we interview John de Goes, we spend the last 20 minutes exploring his ideas around this issue. He points out that—of course—“it depends on the problem you’re solving.”
+In the episode of Happy Path Programming where we interview John de Goes, we spend the last 20 minutes exploring his ideas around this issue. He points out that—of course—“it depends on the problem you’re solving.” 
 
-The default for most cases, he argues, is writing business software. That is also the case where you’re likely to get the least-experienced concurrency programmers, so the default choice is important here, to keep those programmers from making difficult mistakes.
+The default for most cases, he argues, is writing business software. That is also the case where you’re likely to get the least-experienced concurrency programmers, so the default choice is important here, to keep those programmers from making difficult mistakes. 
 
 References:
 
