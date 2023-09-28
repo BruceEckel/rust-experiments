@@ -1,9 +1,13 @@
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use std::ops::Range;
 use std::sync::Arc;
 use std::thread;
 use std::time::Instant;
 use tokio::runtime::{Builder, Runtime};
+
+// Upper & lower percent AND random range:
+const SPAN: Range<i32> = 0..100;
 
 #[derive(Copy, Clone)]
 pub struct YieldPercent {
@@ -13,8 +17,15 @@ pub struct YieldPercent {
 impl YieldPercent {
     pub fn new(value: i32) -> Self {
         Self {
-            value: value.clamp(0, 100),
+            value: value
+                .clamp(SPAN.start, SPAN.end),
         }
+    }
+    pub fn list(values: &[i32]) -> Vec<Self> {
+        values
+            .iter()
+            .map(|&value| Self::new(value))
+            .collect()
     }
 }
 
@@ -22,9 +33,9 @@ pub async fn rand_int(
     rng: &mut StdRng,
     yield_percent: &YieldPercent,
 ) -> i32 {
-    let random = rng.gen_range(0..100);
+    let random = rng.gen_range(SPAN);
+    // Probability-based context switch:
     if random < yield_percent.value {
-        // Probability-based context switch
         tokio::task::yield_now().await;
     }
     random
@@ -93,12 +104,9 @@ pub fn run_tasks(
 }
 
 fn main() {
-    let yields = [
-        YieldPercent::new(0),
-        YieldPercent::new(5),
-        YieldPercent::new(50),
-        YieldPercent::new(100),
-    ];
+    let yields = YieldPercent::list(&[
+        0, 5, 25, 50, 75, 100,
+    ]);
     println!("Single-threaded tokio async");
     let rts = Builder::new_current_thread()
         .enable_all()

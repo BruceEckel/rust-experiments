@@ -1,39 +1,111 @@
 Single-threaded tokio async
 
-Starting 'one' with yielding false
+Start 'one' with yield_percent 0
 'one' on thread "main" (id: ThreadId(1))
-Task 'one' ends after 6.9647ms: 49485726
+Task 'one' ends after 4.2425ms: 49485726
 
-Starting 'two' with yielding false
+Start 'two' with yield_percent 0
 'two' on thread "main" (id: ThreadId(1))
-Task 'two' ends after 6.6995ms: 49485726
-=> Elapsed: 13.8545ms
+Task 'two' ends after 4.2339ms: 49485726
+=> Elapsed: 8.5403ms
 
-Starting 'one' with yielding true
+Start 'one' with yield_percent 5
 'one' on thread "main" (id: ThreadId(1))
 
-Starting 'two' with yielding true
+Start 'two' with yield_percent 5
 'two' on thread "main" (id: ThreadId(1))
-Task 'one' ends after 2.8203043s: 49485726
-Task 'two' ends after 2.8203182s: 49485726
-=> Elapsed: 2.8203759s
+Task 'one' ends after 67.0209ms: 49485726
+Task 'two' ends after 67.0291ms: 49485726
+=> Elapsed: 67.0464ms
 
-Multi-threaded tokio async
+Start 'one' with yield_percent 25
+'one' on thread "main" (id: ThreadId(1))
 
-Starting 'one' with yielding false
-'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Start 'two' with yield_percent 25
+'two' on thread "main" (id: ThreadId(1))
+Task 'one' ends after 291.7032ms: 49485726
+Task 'two' ends after 291.7147ms: 49485726
+=> Elapsed: 291.733ms
 
-Starting 'two' with yielding false
-'two' on thread "tokio-runtime-worker" (id: ThreadId(3))
-Task 'two' ends after 6.4187ms: 49485726
-Task 'one' ends after 6.4605ms: 49485726
-=> Elapsed: 7.0885ms
+Start 'one' with yield_percent 50
+'one' on thread "main" (id: ThreadId(1))
 
-Starting 'one' with yielding true
-'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Start 'two' with yield_percent 50
+'two' on thread "main" (id: ThreadId(1))
+Task 'one' ends after 576.3094ms: 49485726
+Task 'two' ends after 576.3205ms: 49485726
+=> Elapsed: 576.3372ms
 
-Starting 'two' with yielding true
+Start 'one' with yield_percent 75
+'one' on thread "main" (id: ThreadId(1))
+
+Start 'two' with yield_percent 75
+'two' on thread "main" (id: ThreadId(1))
+Task 'two' ends after 852.1807ms: 49485726
+Task 'one' ends after 852.1994ms: 49485726
+=> Elapsed: 852.214ms
+
+Start 'one' with yield_percent 100
+'one' on thread "main" (id: ThreadId(1))
+
+Start 'two' with yield_percent 100
+'two' on thread "main" (id: ThreadId(1))
+Task 'one' ends after 1.1447089s: 49485726
+Task 'two' ends after 1.1447217s: 49485726
+=> Elapsed: 1.1447392s
+
+Two-threaded tokio async
+
+Start 'one' with yield_percent 0
+'one' on thread "tokio-runtime-worker" (id: ThreadId(3))
+
+Start 'two' with yield_percent 0
 'two' on thread "tokio-runtime-worker" (id: ThreadId(2))
-Task 'two' ends after 396.9044ms: 49485726
-Task 'one' ends after 399.9465ms: 49485726
-=> Elapsed: 400.1947ms
+Task 'one' ends after 4.1638ms: 49485726
+Task 'two' ends after 4.1867ms: 49485726
+=> Elapsed: 4.3831ms
+
+Start 'one' with yield_percent 5
+'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+
+Start 'two' with yield_percent 5
+'two' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Task 'two' ends after 19.1569ms: 49485726
+Task 'one' ends after 19.2701ms: 49485726
+=> Elapsed: 19.3053ms
+
+Start 'one' with yield_percent 25
+'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+
+Start 'two' with yield_percent 25
+'two' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Task 'two' ends after 63.8873ms: 49485726
+Task 'one' ends after 65.9416ms: 49485726
+=> Elapsed: 66.0126ms
+
+Start 'one' with yield_percent 50
+'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+
+Start 'two' with yield_percent 50
+'two' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Task 'one' ends after 117.4881ms: 49485726
+Task 'two' ends after 120.3069ms: 49485726
+=> Elapsed: 120.3405ms
+
+Start 'two' with yield_percent 75
+'two' on thread "tokio-runtime-worker" (id: ThreadId(2))
+
+Start 'one' with yield_percent 75
+'one' on thread "tokio-runtime-worker" (id: ThreadId(3))
+Task 'one' ends after 173.6922ms: 49485726
+Task 'two' ends after 175.3486ms: 49485726
+=> Elapsed: 175.4175ms
+
+Start 'two' with yield_percent 100
+'two' on thread "tokio-runtime-worker" (id: ThreadId(3))
+
+Start 'one' with yield_percent 100
+'one' on thread "tokio-runtime-worker" (id: ThreadId(2))
+Task 'two' ends after 224.6892ms: 49485726
+Task 'one' ends after 235.6701ms: 49485726
+=> Elapsed: 235.7067ms
