@@ -93,18 +93,15 @@ pub fn run_tasks(
     let yield_percent =
         Arc::new(yield_percent);
     rt.block_on(async {
-        let task_one =
+        let _ = tokio::try_join!(
             tokio::spawn(calculation(
                 "one",
-                yield_percent.clone(),
-            ));
-        let task_two =
+                yield_percent.clone()
+            )),
             tokio::spawn(calculation(
                 "two",
-                yield_percent.clone(),
-            ));
-        let _ = tokio::try_join!(
-            task_one, task_two
+                yield_percent.clone()
+            ))
         );
     });
     println!(
