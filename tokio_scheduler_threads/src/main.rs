@@ -11,10 +11,16 @@ const SPAN: Range<i32> = 0..100;
 
 #[derive(Copy, Clone)]
 pub struct YieldPercent {
-    pub value: i32,
+    value: i32,
+    // 'value' is private so, outside this
+    // module, you cannot create a
+    // YieldPercent using the
+    // default constructor, as in
+    // YieldPercent{ value: 10 }
 }
 
 impl YieldPercent {
+    // You are forced to go through new():
     pub fn new(value: i32) -> Self {
         Self {
             value: value
@@ -27,6 +33,9 @@ impl YieldPercent {
             .map(|&value| Self::new(value))
             .collect()
     }
+    pub fn value(&self) -> i32 {
+        self.value
+    }
 }
 
 pub async fn rand_int(
@@ -35,7 +44,7 @@ pub async fn rand_int(
 ) -> i32 {
     let random = rng.gen_range(SPAN);
     // Probability-based context switch:
-    if random < yield_percent.value {
+    if random < yield_percent.value() {
         tokio::task::yield_now().await;
     }
     random
@@ -47,7 +56,8 @@ pub async fn calculation(
 ) {
     println!(
         "\nStart '{}' with yield_percent {}",
-        name, yield_percent.value
+        name,
+        yield_percent.value()
     );
     let current_thread = thread::current();
     println!(
@@ -59,9 +69,9 @@ pub async fn calculation(
     let start = Instant::now();
     let mut rng: StdRng =
         SeedableRng::from_seed([42; 32]);
-    let mut x = 0;
+    let mut sum = 0;
     for _ in 0..1_000_000 {
-        x += rand_int(
+        sum += rand_int(
             &mut rng,
             &*yield_percent,
         )
@@ -71,7 +81,7 @@ pub async fn calculation(
         "Task '{}' ends after {:?}: {}",
         name,
         start.elapsed(),
-        x
+        sum
     );
 }
 
