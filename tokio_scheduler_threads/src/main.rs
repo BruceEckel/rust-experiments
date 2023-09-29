@@ -12,8 +12,8 @@ const SPAN: Range<i32> = 0..100;
 #[derive(Copy, Clone)]
 pub struct YieldPercent {
     value: i32,
-    // 'value' is private so, outside this
-    // module, you cannot create a
+    // 'value' is private: outside this
+    // module you cannot create a
     // YieldPercent using the
     // default constructor, as in
     // YieldPercent{ value: 10 }
