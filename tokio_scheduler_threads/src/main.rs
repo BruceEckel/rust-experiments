@@ -1,7 +1,6 @@
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use std::ops::Range;
-use std::sync::Arc;
 use std::thread;
 use std::time::Instant;
 use tokio::runtime::{Builder, Runtime};
@@ -40,7 +39,7 @@ impl YieldPercent {
 
 pub async fn rand_int(
     rng: &mut StdRng,
-    yield_percent: &YieldPercent,
+    yield_percent: YieldPercent,
 ) -> i32 {
     let random = rng.gen_range(SPAN);
     // Probability-based context switch:
@@ -52,7 +51,7 @@ pub async fn rand_int(
 
 pub async fn calculation(
     name: &str,
-    yield_percent: Arc<YieldPercent>,
+    yield_percent: YieldPercent,
 ) {
     println!(
         "\nStart '{}' with yield_percent {}",
@@ -71,11 +70,9 @@ pub async fn calculation(
         SeedableRng::from_seed([42; 32]);
     let mut sum = 0;
     for _ in 0..1_000_000 {
-        sum += rand_int(
-            &mut rng,
-            &*yield_percent,
-        )
-        .await;
+        sum +=
+            rand_int(&mut rng, yield_percent)
+                .await;
     }
     println!(
         "Task '{}' ends after {:?}: {}",
@@ -90,17 +87,15 @@ pub fn run_tasks(
     yield_percent: YieldPercent,
 ) {
     let start = Instant::now();
-    let yield_percent =
-        Arc::new(yield_percent);
     rt.block_on(async {
         let _ = tokio::try_join!(
             tokio::spawn(calculation(
                 "one",
-                yield_percent.clone()
+                yield_percent
             )),
             tokio::spawn(calculation(
                 "two",
-                yield_percent.clone()
+                yield_percent
             ))
         );
     });
