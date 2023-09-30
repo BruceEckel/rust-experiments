@@ -67,18 +67,17 @@ fn main() {
         .map(|p| {
             let table = table.clone();
             let sender = tx.clone();
-
             thread::spawn(move || {
                 p.eat(&table, &sender);
             })
         })
         .collect();
 
-    // for f in futures {
-    //     f.join().unwrap();
-    // }
     futures.into_iter().for_each( |f| f.join().unwrap());
-    // Is there some join macro that makes this cleaner?
+    // To make this cleaner:
+    // use futures::future::join_all;
+    // let futures: Vec<_> = (0..10).map(|_| async_task()).collect();
+    // let results: Vec<_> = join_all(futures).await;
 
     tx.send(format!("Done")).unwrap();
 
@@ -93,7 +92,4 @@ fn main() {
     }
     println!("{}", result);
 
-    vec![1, 2, 3, 4, 5].iter().for_each( |i| {
-        println!("{}", i);
-    });
 }
