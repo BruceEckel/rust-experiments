@@ -1,8 +1,8 @@
 # unstable_features = true
 # https://rust-lang.github.io/rustfmt
-max_width = 52
-comment_width = 52
+max_width = 54
+comment_width = 54
 wrap_comments = true
-chain_width = 52
+chain_width = 54
 reorder_imports = true
 imports_granularity = "Module"
