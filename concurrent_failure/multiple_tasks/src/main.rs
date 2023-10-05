@@ -28,7 +28,10 @@ async fn main() {
 
     let tasks: Vec<_> = (0..10)
         .map(|i| {
-            tokio::spawn(fallible(i, print_lock.clone()))
+            tokio::spawn(fallible(
+                i,
+                print_lock.clone(),
+            ))
         })
         .collect();
 
