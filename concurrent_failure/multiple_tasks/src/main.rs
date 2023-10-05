@@ -6,7 +6,7 @@ async fn fallible(
     print_lock: Arc<Mutex<()>>,
 ) -> Result<char, String> {
     {
-        // Can't write to output simultaneously:
+        // Prevent interleaves to std output:
         let _lock = print_lock.lock().await;
         println!("fallible({})", i);
     } // _lock released
@@ -23,7 +23,7 @@ async fn fallible(
 
 #[tokio::main]
 async fn main() {
-    // Prevents interleaving output:
+    // Prevents interleaving std output:
     let print_lock = Arc::new(Mutex::new(()));
 
     let tasks: Vec<_> = (0..10)
