@@ -44,7 +44,7 @@ async fn main() {
         futures::future::join_all(tasks).await;
 
     for result in results.iter() {
-        let _lock = print_lock.lock().await;
+         // Coroutines complete: no lock needed here
         print!("{:?} => ", result);
         match result {
             Ok(Ok(l)) => println!("Letter: {}", l),
