@@ -1,45 +1,60 @@
 use std::sync::Arc;
+use std::time::Duration;
+use thiserror::Error;
 use tokio::sync::Mutex;
+use tokio::time::sleep;
+use FallibleError::*;
+
+#[derive(Error, Debug)]
+pub enum FallibleError {
+    #[error("V[{0}]")]
+    ValueError(i32),
+    #[error("T[{0}]")]
+    TypeError(i32),
+    #[error("A[{0}]")]
+    AttributeError(i32),
+}
 
 async fn fallible(
-    i: usize,
-    print_lock: Arc<Mutex<()>>,
-) -> Result<char, String> {
+    i: i32,
+    stdout: Arc<Mutex<()>>,
+) -> Result<char, FallibleError> {
+    sleep(Duration::from_millis(100)).await;
     {
-        // Prevent interleaves to std output:
-        let _lock = print_lock.lock().await;
+        // Prevent interleaves to standard output:
+        let _lock = stdout.lock().await;
         println!("fallible({})", i);
     } // _lock released
 
     match i {
-        5 => panic!("i:{} panicked!", i),
-        _ if i % 2 == 0 => {
-            Err(format!("Failed({})", i))
+        1 => Err(ValueError(i)),
+        3 => Err(TypeError(i)),
+        5 => Err(AttributeError(i)),
+        // 7 => panic!("i:{} panicked!", i),
+        _ => {
+            sleep(Duration::from_secs(3)).await;
+            Ok((b'a' + i as u8) as char)
         }
-        // Convert number to char:
-        _ => Ok((b'a' + i as u8) as char),
     }
 }
 
 #[tokio::main]
 async fn main() {
     // Prevents interleaving std output:
-    let print_lock = Arc::new(Mutex::new(()));
+    let stdout = Arc::new(Mutex::new(()));
 
-    let tasks: Vec<_> = (0..10)
+    let tasks: Vec<_> = (0..8)
         .map(|i| {
-            tokio::spawn(fallible(
-                i,
-                print_lock.clone(),
-            ))
+            tokio::spawn(fallible(i, stdout.clone()))
         })
         .collect();
 
     {
-        let _lock = print_lock.lock().await;
+        let _lock = stdout.lock().await;
         println!("Tasks created");
     }
 
+    // Run all tasks to completion:
     let results: Vec<_> =
         futures::future::join_all(tasks).await;
 
