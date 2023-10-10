@@ -21,7 +21,7 @@ async fn fallible(
 ) -> Result<char, FallibleError> {
     sleep(Duration::from_millis(100)).await;
     {
-        // Prevent interleaves to standard output:
+        // Only one task can print at a time:
         let _lock = stdout.lock().await;
         println!("fallible({})", i);
     } // _lock released
@@ -40,7 +40,7 @@ async fn fallible(
 
 #[tokio::main]
 async fn main() {
-    // Prevents interleaving std output:
+    // Keeps tasks from interleaving std output:
     let stdout = Arc::new(Mutex::new(()));
 
     let tasks: Vec<_> = (0..8)
@@ -49,12 +49,10 @@ async fn main() {
         })
         .collect();
 
-    {
-        let _lock = stdout.lock().await;
-        println!("Tasks created");
-    }
+    // Tasks haven't started yet; no contention:
+    println!("Tasks created");
 
-    // Run all tasks to completion:
+    // Start & run all tasks to completion:
     let results: Vec<_> =
         futures::future::join_all(tasks).await;
 
