@@ -29,7 +29,7 @@ async fn fallible(
     match i {
         1 => Err(ValueError(i)),
         3 => Err(TypeError(i)),
-        5 => Err(AttributeError(i)),
+        5 | 6 => Err(AttributeError(i)),
         // 7 => panic!("i:{} panicked!", i),
         _ => {
             sleep(Duration::from_secs(3)).await;
