@@ -10,7 +10,7 @@ pub enum FallibleError {
     #[error("V[{0}]")]
     ValueError(i32),
     #[error("T[{0}]")]
-    TypeError(i32),
+    TabError(i32),
     #[error("A[{0}]")]
     AttributeError(i32),
 }
@@ -28,7 +28,7 @@ async fn fallible(
 
     match i {
         1 => Err(ValueError(i)),
-        3 => Err(TypeError(i)),
+        3 => Err(TabError(i)),
         5 | 6 => Err(AttributeError(i)),
         // 7 => panic!("i:{} panicked!", i),
         _ => {
