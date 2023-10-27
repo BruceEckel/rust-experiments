@@ -19,3 +19,4 @@ Cargo.lock
 *.xml
 trait_objects/src/workshop.txt
 .idea/workspace.xml
+*.iml
