@@ -1,4 +1,4 @@
-// concurrent_failure/multiple_tasks/src/main.rs
+// multiple_tasks/src/main.rs
 use std::sync::Arc;
 use std::time::Duration;
 use thiserror::Error;
